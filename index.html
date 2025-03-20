@@ -1,0 +1,460 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>SpokenWardrobe</title>
+  <link rel="stylesheet" href="https://use.typekit.net/qec7nee.css">
+  
+  <style>
+    /* border */
+    :root {
+      --background: #005;
+      --primary: #88D5BF;
+      --secondary: #5D6BF8;
+      --third: #e27fcb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    #status {
+      font-family: "hwt-arabesque", sans-serif;
+      font-weight: 400;
+      font-style: normal;
+      margin-bottom: 100px;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .wrapper {
+      transform: rotate(90deg);
+      transform-origin:bottom left;
+      
+      position:absolute;
+      top: -100vw;
+      left: 0;
+      
+      height:100vw;
+      width:100vh;
+      
+      background-color:#000;
+      color:#fff;
+
+      overflow:auto;
+    }
+
+    canvas {
+      position: absolute;
+      height: 100% !important;
+      width: auto !important;
+      z-index: 10;
+    }
+
+    main {
+      width: 1500px; /* Desired width of the container */
+      margin-top: 450px;
+      height: 85% !important; /* Desired height of the container */
+      overflow: hidden; /* Hide overflow (cropping) */
+      border: 0px solid black; /* Optional border for visibility */
+      padding: 5px;
+
+      position: relative; /* Needed for absolute positioning of the canvas */
+      align-items: center;
+      display: flex;
+      justify-content: center;
+
+      background: linear-gradient(45deg, var(--primary) 0%, var(--secondary) 100%);
+      animation: morph 8s ease-in-out infinite;
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+      /* height: 400px; */
+      transition: all 3s ease-in-out;
+      /* width: 400px; */
+      z-index: 5;
+    }
+
+    #wardrobe {
+      /* match the position of main */
+      position: absolute;
+      top: 200px;
+      left: 0px;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      border: 0px solid black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #wardrobeImg {
+      width: 250%;
+      height: auto;
+      position: absolute;
+      z-index:-1;
+    }
+
+    .container {
+      align-items: center;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+    }
+
+    .shape {
+      background: linear-gradient(45deg, var(--primary) 0%, var(--secondary) 100%);
+      animation: morph 8s ease-in-out infinite;
+      border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+      height: 400px;
+      transition: all 1s ease-in-out;
+      width: 400px;
+      z-index: 5;
+    }
+
+    @keyframes morph {
+      0% {
+          border-radius:  60% 40% 30% 70% / 60% 30% 70% 40%;
+          background: linear-gradient(45deg, var(--primary) 0%, var(--secondary) 100%);
+      } 
+      
+      50% {
+          border-radius:  30% 60% 70% 40% / 50% 60% 30% 60%;
+          background: linear-gradient(45deg, var(--third) 0%, var(--secondary) 100%);
+      }
+      
+      100% {
+        border-radius:  60% 40% 30% 70% / 60% 30% 70% 40%;
+        background: linear-gradient(45deg, var(--primary) 0%, var(--secondary) 100%);
+      } 
+    }
+
+    /* screensaver */
+    #screenSaverCont {
+      width: 100%;
+      height: 100%;
+    }
+
+    .tile {
+      box-sizing: border-box;
+      border-radius: 10px;
+      width: 200px;
+      height: auto;
+      position: absolute;
+      overflow: hidden;
+    }
+
+    .tileImg {
+      width: 100%;
+      height: auto;
+    }
+
+    @keyframes moveLeft{
+        0% {left:-15%}
+        100% {left: 110%}
+    }
+
+    @keyframes moveRight{
+        0% {right:-15%}
+        100% {right: 110%}
+    }
+
+    .hide {
+      display: none;
+    }
+
+    #myGif {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      z-index: -2;
+
+      min-width: 100%;
+      min-height: 100%;
+    }
+
+
+    #blackFilter {
+      background-color: rgba(0,0,0,0.8);
+
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      z-index: -1;
+
+      width: 110vw;
+      min-width: 100vw;
+      height: 100vh;
+      min-height: 100%;
+    }
+
+    h1 {
+      font-family: "hwt-arabesque", sans-serif;
+      font-weight: 400;
+      font-style: normal;
+      font-size: 90pt;
+      /* -webkit-text-stroke-width: 2px; */
+      /* -webkit-text-stroke-color: purple; */
+      color:white;
+    }
+
+    h2 {
+      font-family: "hwt-arabesque", sans-serif;
+      font-weight: 400;
+      font-style: normal;
+      font-size: 60pt;
+      /* -webkit-text-stroke-width: 2px; */
+      /* -webkit-text-stroke-color: purple; */
+      color:white;
+    }
+
+    #title {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      width: 60%;
+      /* font-size: 80pt!important; */
+      text-align: center;
+    }
+
+    #resetInst{
+     
+      position: absolute;
+      top: 800px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      width: 60%;
+      /* font-size: 80pt!important; */
+      text-align: center;
+    
+    }
+
+    #instructions {
+      position: absolute;
+      top: 150px;
+      left:100px;
+      width: 400px;
+      font-size: 25pt!important;
+      text-align: center;
+    }
+
+    #buttons {
+      position: absolute;
+      top: 50%;
+      left: 85%;
+      transform: translate(-50%,-50%);
+      z-index: 10;
+    }
+
+    #buttons button {
+      font-family: "hwt-arabesque", sans-serif;
+      font-weight: 400;
+      font-style: normal;
+      font-size: 40pt!important;
+    }
+
+    span {
+      color: red;
+    }
+
+    #qrcode {
+
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      width: 900px !important;
+      height: 900px !important;
+      z-index: 100;
+
+      padding: 0px;
+    }
+
+    #qrcode > img {
+      border: solid 10px white;
+
+    }
+  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/peterhry/CircleType@2.3.1/dist/circletype.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.2/p5.min.js"></script>
+  <script src="https://unpkg.com/ml5@0.20.0-alpha.4/dist/ml5.min.js"></script>
+
+</head>
+
+<body >
+  
+  <img src="./gif/tripygif.gif" id="myGif"></img>
+  <div id="blackFilter"></div>
+  <div id="title">
+    <h1>WELCOME TO SPOKEN WARDROBE</h1>
+  </div>
+  
+  <div id="instructions">
+    <h2>You have <span>20</span> seconds to ask the mirror on the wall for a crazy outfit</h2>
+  </div>
+ 
+  <div id="wardrobe">
+    <img id="wardrobeImg" src="./img/wardrobe.png" >
+  </div>
+  <script src="sketch.js"></script>
+  <div id="screenSaverCont">
+    <div id="resetInst">
+      <h2>Press any key to restart (behind you)</h2>
+    </div>
+
+    <div id="qrcode"></div>
+  </div>
+
+  <script>
+    let screenSaverCont = document.querySelector("#screenSaverCont")
+    let main = document.querySelector("main")
+    let wardrobe = document.querySelector("#wardrobe")
+    let wardrobeImg = document.querySelector("#wardrobeImg")
+    let instructions = document.querySelector("#instructions")
+    let buttons = document.querySelector("#buttons")
+    let restart = document.querySelector("#restart")
+    let title = document.querySelector("#title")
+    let qrcode = document.querySelector("#qrcode")
+    let resetInst = document.querySelector("#resetInst")
+    screenSaverCont.classList.add('hide')
+
+    $(document).keydown(function(keyPressed) {
+      // if (keyPressed.keyCode == 84 && displayGoing == false) {
+      if (displayGoing == false) {
+        // console.log('restart')
+        // // show wardrobe, and all text
+        // wardrobe.classList.remove('hide')
+        // wardrobeImg.classList.remove('hide')
+        // instructions.classList.remove('hide')
+        // screenSaverCont.classList.add('hide')
+        // document.querySelector("main").classList.remove('hide')
+        // // clear screen saver
+        // displayGoing = true;
+        // // draw3d = true;
+        // time = 0;
+        // imgLoaded = false;
+        // displayedText = "";
+        // wordsA = ["clothes", "clothing", "wearing", "garments", "attire", "garment", "outfit"];
+        // words=""
+        // images = [];
+        // videoOn = true;
+        // successfull = false;
+        // countAsks = 0;
+        // processing = false;
+        // recording = false;
+        // imageUrl = "";
+        // img = null;
+        // document.querySelector("span").innerHTML=timeToTalk;
+        // beginRecord();
+        location.reload();
+      }
+    });
+
+    // new CircleType(document.querySelector('h1')).radius(2);
+    function showAllPics() {
+      screenSaver = true;
+      console.log('showAllPics')
+      // hide wardrobe, and all text
+      wardrobe.classList.add('hide')
+      wardrobeImg.classList.add('hide')
+      instructions.classList.add('hide')
+    
+      // clear the qr code div of any images
+      qrcode.innerHTML = "";
+      // Create a new QRCode instance
+      var qrcodeImg = new QRCode(qrcode, {
+        text: imageUrl,
+        width: 900,
+        height: 900,
+        // colorDark : '#000',
+        // colorLight : '#fff'
+        // correctLevel : QRCode.CorrectLevel.H
+      });
+
+      // Retrieve the data URL from local storage
+      let imagesArray = getImagesArray();
+      let counter = localStorage.getItem('counter');
+
+      // Check if data URL is retrieved successfully
+      if (imagesArray) {
+        // console.log(imagesArray)
+        // console.log(counter)
+        screenSaverCont.classList.remove('hide')
+        // Create an <img> element
+        for (let i = 0; i < parseInt(counter); i++) {
+          // console.log(i)
+          // console.log(imagesArray[i])
+          let imgElement = document.createElement('img');
+          let tester = new Image();
+          tester.onload = function() {
+              
+              
+            
+            imgElement.src = localStorage.getItem(imagesArray[i])
+            imgElement.classList.add("tileImg");
+
+            let ranMorphTime = Math.random() * (20 - 5) + 5;
+
+            imgElement.style.animation = "morph" + " " + ranMorphTime + "s ease-in-out infinite";
+
+            // animation: morph 8s ease-in-out infinite;
+            // Get the div where you want to display the image
+            let imageDiv = document.createElement('div');
+            imageDiv.classList.add("tile");
+            imageDiv.id = imagesArray[i];
+            // Append the <img> element to the div
+            var ranTop = Math.random() * ((document.body.scrollHeight + 300)- 100) + 100;
+            var ranMove = Math.floor(Math.random() * (80 - 25) + 25);
+
+            let ranWidth = Math.random() * (950 - 400) + 400;
+            // make sure that image is not loaded off the  bottom of the screen
+            if (ranTop > (document.body.scrollHeight - ranWidth)) {
+              ranTop = document.body.scrollHeight - ranWidth - 100;
+            }
+            
+            imageDiv.style.top = ranTop + "px";
+            imageDiv.style.width = ranWidth + "px";
+
+            if (i % 2 == 0) {
+              imageDiv.style.right = "-15%";
+              imageDiv.style.animation = "moveRight" + " " + ranMove + "s linear infinite";
+            } else {
+              imageDiv.style.left = "-15%";
+              imageDiv.style.animation = "moveLeft" + " " + ranMove + "s linear infinite";
+            }
+            // make sure same id image is not already on screen
+            if (!document.getElementById(imagesArray[i])) {
+              imageDiv.appendChild(imgElement);
+              screenSaverCont.appendChild(imageDiv);
+            }
+          }
+          tester.src = localStorage.getItem(imagesArray[i]);
+        }
+       
+      }
+      document.querySelector("main").classList.add('hide')
+    }
+    // restart.onclick = function (e) {
+      
+    // }
+
+    
+  </script>
+  
+</body>
+
+</html>
