@@ -1,5 +1,7 @@
 
-const replicateProxy = "https://replicate-api-proxy.glitch.me";
+// const replicateProxy = "https://replicate-api-proxy.glitch.me";
+
+
 // let feedback;
 let img;
 let images = [];
@@ -64,6 +66,10 @@ function preload() {
   bodyPix = ml5.bodySegmentation("BodyPix", options);
 }
 
+// --------------------------------TRANSFORMERS.JS
+let transcriber;
+let isWhisperLoaded = false;
+
 function setup() {
   canvas = createCanvas(640, 480);
   canvas.position(0, 120);
@@ -82,10 +88,38 @@ function setup() {
   bodyPix.detectStart(video, gotResults);
   
   overlayLayer = createGraphics(width, height);
+
+  // Add this to your setup() function
+  // async function setupWhisper() {
+  //   const { pipeline } = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.0");
+  //   transcriber = await pipeline(
+  //     "automatic-speech-recognition",
+  //     "onnx-community/whisper-base", // or use whisper-tiny.en for faster performance
+  //     { device: "webgpu" }
+  //   );
+  //   console.log("Whisper model loaded!");
+  //   isWhisperLoaded = true;
+  // }
+
+  // Call this from setup
+  setupWhisper();
 }
 
-function modelLoaded() {
-  console.log('Model Loaded!');
+
+// Add this function to load the Whisper model
+async function setupWhisper() {
+  try {
+    const { pipeline } = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.4.0");
+    transcriber = await pipeline(
+      "automatic-speech-recognition",
+      "onnx-community/whisper-base", // You can switch to whisper-tiny.en for faster performance
+      { device: "webgpu" }
+    );
+    isWhisperLoaded = true;
+    console.log("Whisper model loaded!");
+  } catch (error) {
+    console.error("Error loading Whisper model:", error);
+  }
 }
 
 if (displayGoing) {
@@ -277,38 +311,60 @@ if (displayGoing) {
   }
 }
 // ------------------------------------------------
-async function askWithAudio(audio) {
-  document.body.style.cursor = "progress";
+// async function askWithAudio(audio) {
+//   document.body.style.cursor = "progress";
 
-  const b64Audio = await convertBlobToBase64(audio);
-  // feedback.html("Waiting for reply from Replicate Audio...\n Time remaining:" + (timeToTalk - time) + " seconds");
-  let data = {
-    version: "4d50797290df275329f202e48c76360b3f22b08d28c196cbc54600319435f8d2",
-    input: {
-      audio: b64Audio,
-    },
-  };
-  const url = replicateProxy + "/askReplicateAudio/";
-  let options = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify(data),
-  };
-  const response = await fetch(url, options);
-  const openAI_json = await response.json();
-  console.log("audio_response", openAI_json.output.transcription);
+//   const b64Audio = await convertBlobToBase64(audio);
+//   // feedback.html("Waiting for reply from Replicate Audio...\n Time remaining:" + (timeToTalk - time) + " seconds");
+//   let data = {
+//     version: "4d50797290df275329f202e48c76360b3f22b08d28c196cbc54600319435f8d2",
+//     input: {
+//       audio: b64Audio,
+//     },
+//   };
+//   const url = replicateProxy + "/askReplicateAudio/";
+//   let options = {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Accept: "application/json",
+//     },
+//     body: JSON.stringify(data),
+//   };
+//   const response = await fetch(url, options);
+//   const openAI_json = await response.json();
+//   console.log("audio_response", openAI_json.output.transcription);
 
 
-  // feedback.html(openAI_json.output.transcription);
-  displayedText += openAI_json.output.transcription + displayedText + "\n";
+//   // feedback.html(openAI_json.output.transcription);
+//   displayedText += openAI_json.output.transcription + displayedText + "\n";
 
-  feedbackSplit = openAI_json.output.transcription.trim().split(" ");
-  wordsA.push(feedbackSplit);
-  // document.body.style.cursor = "auto";
+//   feedbackSplit = openAI_json.output.transcription.trim().split(" ");
+//   wordsA.push(feedbackSplit);
+//   // document.body.style.cursor = "auto";
+// }
+
+
+// Replace your askWithAudio function with this simpler version
+async function askWithAudio(audioBlob) {
+  // This function is now handled by the mediaRecorder.stop event
+  // We keep it for compatibility with your existing code
+  try {
+    const audioContext = new AudioContext({sampleRate: 16000});
+    const arrayBuffer = await audioBlob.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    const waveform = audioBuffer.getChannelData(0);
+    
+    const result = await transcriber(waveform);
+    displayedText += result.text + "\n";
+    
+    const feedbackSplit = result.text.trim().split(" ");
+    wordsA = wordsA.concat(feedbackSplit);
+  } catch (error) {
+    console.error("Error in askWithAudio:", error);
+  }
 }
+
 
 async function convertBlobToBase64(audioBlob) {
   return new Promise((resolve, reject) => {
@@ -323,70 +379,175 @@ async function convertBlobToBase64(audioBlob) {
     reader.readAsDataURL(audioBlob);
   });
 }
-async function stopRecord() {
-  if (countAsks == 0) {
-    mediaRecorder.stop();
 
+
+// Update your stopRecord function
+async function stopRecord() {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+  }
+  
+  recording = false;
+  
+  if (countAsks == 0) {
     img = video.get();
     processing = true;
-   
   }
+  
   if (countAsks <= 7) {
     countAsks++;
-    // mediaRecorder.stop();
-
-    // img = video.get();
-    // processing = true;
-    ask();
-    // pause = true;
+    ask(); // This will handle the image generation part with the transcribed text
   }
-};
-async function beginRecord() {
-  recording = true;
-  // Request access to the user's microphone
-  mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+}
+// async function beginRecord() {
 
-  let mrChunks = [];
+//   recording = true;
+//   // Request access to the user's microphone
+//   mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-  // Create a media recorder and start recording
-  mediaRecorder = new MediaRecorder(mediaStream);
-  mediaRecorder.addEventListener("dataavailable", (event) => {
-    mrChunks.push(event.data);
-  });
-  mediaRecorder.addEventListener("stop", (event) => {
-    const recordedData = new Blob(mrChunks, { type: "audio/webm" });
-    console.log("Recording stopped", recordedData);
+//   let mrChunks = [];
 
-    let av = document.createElement("VIDEO");
-    var audioURL = window.URL.createObjectURL(recordedData);
-    av.src = audioURL;
-    av.width = 100;
-    av.height = 1;
-    document.body.appendChild(av);
+//   // Create a media recorder and start recording
+//   mediaRecorder = new MediaRecorder(mediaStream);
+//   mediaRecorder.addEventListener("dataavailable", (event) => {
+//     mrChunks.push(event.data);
+//   });
+//   mediaRecorder.addEventListener("stop", (event) => {
+//     const recordedData = new Blob(mrChunks, { type: "audio/webm" });
+//     console.log("Recording stopped", recordedData);
 
-    askWithAudio(recordedData);
-  });
-  mediaRecorder.start();
+//     let av = document.createElement("VIDEO");
+//     var audioURL = window.URL.createObjectURL(recordedData);
+//     av.src = audioURL;
+//     av.width = 100;
+//     av.height = 1;
+//     document.body.appendChild(av);
 
-  console.log("Recording started");
+//     askWithAudio(recordedData);
+//   });
+//   mediaRecorder.start();
 
-  let textTime = document.querySelector("span");
-  timer = setInterval (function() {
-    time++;
-    textTime.innerHTML = timeToTalk - time;
-  }, 1000)
+//   console.log("Recording started");
 
-  // Stop and start the recording every 5 seconds if human present
-  interval = setInterval(() => {
-    if (mediaRecorder.state === 'recording') {
-      mediaRecorder.stop();
-      mrChunks = [];
-      mediaRecorder.start();
-      console.log("Recording restarted");
-    }
-  }, 4000);
-};
+//   let textTime = document.querySelector("span");
+//   timer = setInterval (function() {
+//     time++;
+//     textTime.innerHTML = timeToTalk - time;
+//   }, 1000)
+
+//   // Stop and start the recording every 5 seconds if human present
+//   interval = setInterval(() => {
+//     if (mediaRecorder.state === 'recording') {
+//       mediaRecorder.stop();
+//       mrChunks = [];
+//       mediaRecorder.start();
+//       console.log("Recording restarted");
+//     }
+//   }, 4000);
+// };
 // ---------------------- Whisper + 3D PoseNet ----------------------
+
+async function beginRecord() {
+  try {
+    // Make sure the model is loaded first
+    if (!isWhisperLoaded) {
+      console.log("Waiting for Whisper model to load...");
+      await new Promise(resolve => {
+        const checkInterval = setInterval(() => {
+          if (isWhisperLoaded) {
+            clearInterval(checkInterval);
+            resolve();
+          }
+        }, 500);
+      });
+    }
+    
+    // Request microphone access
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recording = true;
+    
+    let mrChunks = [];
+    
+    // Create and configure media recorder
+    mediaRecorder = new MediaRecorder(mediaStream);
+    mediaRecorder.addEventListener("dataavailable", (event) => {
+      mrChunks.push(event.data);
+    });
+    
+    mediaRecorder.addEventListener("stop", async (event) => {
+      // Only process if we have audio data
+      if (mrChunks.length === 0) return;
+      
+      const recordedData = new Blob(mrChunks, { type: "audio/webm" });
+      console.log("Recording stopped", recordedData);
+      
+      try {
+        // Convert to audio buffer
+        const audioContext = new AudioContext({sampleRate: 16000}); // Whisper works best with 16kHz
+        const arrayBuffer = await recordedData.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        
+        // Get the audio data (use first channel)
+        const waveform = audioBuffer.getChannelData(0);
+        
+        // Process with Whisper
+        const result = await transcriber(waveform);
+        console.log("Transcription result:", result);
+        
+        // Update displayed text
+        displayedText += result.text + "\n";
+        
+        // Add words to your wordsA array for later use
+        const feedbackSplit = result.text.trim().split(" ");
+        wordsA = wordsA.concat(feedbackSplit);
+        
+        // Restart recording for continuous transcription
+        if (recording) {
+          mrChunks = [];
+          setTimeout(() => {
+            if (mediaRecorder.state !== 'recording' && recording) {
+              mediaRecorder.start();
+            }
+          }, 100);
+        }
+      } catch (error) {
+        console.error("Error processing audio:", error);
+      }
+    });
+    
+    // Start recording
+    mediaRecorder.start();
+    console.log("Recording started");
+    
+    // Setup timer for countdown
+    let textTime = document.querySelector("span");
+    timer = setInterval(function() {
+      time++;
+      textTime.innerHTML = timeToTalk - time;
+      
+      // Stop recording when time is up
+      if (time >= timeToTalk) {
+        stopRecord();
+        clearInterval(timer);
+        clearInterval(interval);
+      }
+    }, 1000);
+    
+    // Set up interval for chunking the audio
+    interval = setInterval(() => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+    }, 4000); // Process audio every 4 seconds
+    
+  } catch (error) {
+    console.error("Error starting recording:", error);
+    if (error.name === 'NotAllowedError') {
+      alert("Microphone permission is required for this application to work");
+    }
+  }
+}
+
 function gotPoses(results) {
   // Save the output to the poses variable
   poses = results;
@@ -605,4 +766,38 @@ function getImagesArray() {
 function updateImagesArray(images) {
   // Convert the array to a JSON string and save it in local storage
   localStorage.setItem('images', JSON.stringify(images));
+}
+
+// Add this helper function to resample audio if needed
+function resampleAudio(audioBuffer, targetSampleRate = 16000) {
+  const sampleRate = audioBuffer.sampleRate;
+  const length = audioBuffer.length;
+  const channels = audioBuffer.numberOfChannels;
+  
+  // If already at the target sample rate, return the original
+  if (sampleRate === targetSampleRate) {
+    return audioBuffer.getChannelData(0);
+  }
+  
+  // Calculate new length based on sample rate ratio
+  const newLength = Math.round(length * targetSampleRate / sampleRate);
+  const result = new Float32Array(newLength);
+  
+  // Simple linear interpolation for resampling
+  const channel = audioBuffer.getChannelData(0);
+  const increment = sampleRate / targetSampleRate;
+  
+  for (let i = 0; i < newLength; i++) {
+    const position = i * increment;
+    const index = Math.floor(position);
+    const fraction = position - index;
+    
+    if (index >= length - 1) {
+      result[i] = channel[length - 1];
+    } else {
+      result[i] = channel[index] * (1 - fraction) + channel[index + 1] * fraction;
+    }
+  }
+  
+  return result;
 }
