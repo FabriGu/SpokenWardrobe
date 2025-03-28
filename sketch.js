@@ -1,5 +1,6 @@
 
-const replicateProxy = "https://replicate-api-proxy.glitch.me";
+const replicateProxy = "https://replicate-api-proxy-2.glitch.me";
+
 // let feedback;
 let img;
 let images = [];
