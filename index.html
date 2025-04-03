@@ -27,6 +27,7 @@
 
     body {
       margin: 0;
+      padding:0;
       overflow: hidden;
 
       display: flex;
@@ -34,6 +35,13 @@
       align-items: center;
       flex-direction: column;
       height: 100vh;
+
+      /* -moz-transform: scaleX(-1);
+        -o-transform: scaleX(-1);
+        -webkit-transform: scaleX(-1);
+        transform: scaleX(-1);
+        filter: FlipH;
+        -ms-filter: "FlipH"; */
     }
 
     .wrapper {
@@ -48,7 +56,7 @@
       width:100vh;
       
       background-color:#000;
-      color:#fff;
+      color:#000;
 
       overflow:auto;
     }
@@ -62,8 +70,8 @@
 
     main {
       width: 1500px; /* Desired width of the container */
-      margin-top: 450px;
-      height: 85% !important; /* Desired height of the container */
+      margin-top: 10vh;
+      height: 110% !important; /* Desired height of the container */
       overflow: hidden; /* Hide overflow (cropping) */
       border: 0px solid black; /* Optional border for visibility */
       padding: 5px;
@@ -183,7 +191,7 @@
 
 
     #blackFilter {
-      background-color: rgba(0,0,0,0.8);
+      background-color: rgba(0,0,0,1);
 
       position: fixed;
       right: 0;
@@ -194,16 +202,19 @@
       min-width: 100vw;
       height: 100vh;
       min-height: 100%;
+
+      padding: 0;
+      margin: 0;
     }
 
     h1 {
       font-family: "hwt-arabesque", sans-serif;
       font-weight: 400;
       font-style: normal;
-      font-size: 90pt;
+      font-size: 5vw;
       /* -webkit-text-stroke-width: 2px; */
       /* -webkit-text-stroke-color: purple; */
-      color:white;
+      color:black;
     }
 
     h2 {
@@ -213,18 +224,19 @@
       font-size: 60pt;
       /* -webkit-text-stroke-width: 2px; */
       /* -webkit-text-stroke-color: purple; */
-      color:white;
+      color:black;
     }
 
     #title {
       position: absolute;
-      top: -30px;
+      top: 0px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 10;
       width: 60%;
       /* font-size: 80pt!important; */
       text-align: center;
+      /* font-size: 200pt; */
     }
 
     #resetInst{
@@ -247,6 +259,7 @@
       width: 400px;
       font-size: 25pt!important;
       text-align: center;
+      display:none;
     }
 
     #buttons {
@@ -286,19 +299,34 @@
 
     }
   </style>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.2/p5.min.js"></script> -->
+    <script>
+      (function() {
+        const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
+        window.AudioContext = function(options) {
+          options = options || {};
+          options.sampleRate = 16000;  // Force sample rate to 16000 Hz
+          return new OriginalAudioContext(options);
+        };
+      })();
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js"></script>
+    <script src="https://unpkg.com/ml5@0.20.0-alpha.4/dist/ml5.min.js"></script>
+  
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/peterhry/CircleType@2.3.1/dist/circletype.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.2/p5.min.js"></script>
-  <script src="https://unpkg.com/ml5@0.20.0-alpha.4/dist/ml5.min.js"></script>
 
+  
+  
 </head>
 
 <body >
   
-  <img src="./gif/tripygif.gif" id="myGif"></img>
-  <div id="blackFilter"></div>
+  <!-- <img src="./gif/tripygif.gif" id="myGif"></img> -->
+  <!-- <div id="blackFilter"></div> -->
   <div id="title">
     <h1>WELCOME TO SPOKEN WARDROBE</h1>
   </div>
@@ -306,19 +334,19 @@
   <div id="instructions">
     <h2>You have <span>20</span> seconds to ask the mirror on the wall for a crazy outfit</h2>
   </div>
- 
+<!--  
   <div id="wardrobe">
     <img id="wardrobeImg" src="./img/wardrobe.png" >
-  </div>
-  <script src="sketch.js"></script>
+  </div> -->
+  
   <div id="screenSaverCont">
     <div id="resetInst">
       <h2>Press any key to restart (behind you)</h2>
     </div>
-
     <div id="qrcode"></div>
   </div>
-
+  <script src="whisper.js"></script>
+  <script src="sketch.js"></script>
   <script>
     let screenSaverCont = document.querySelector("#screenSaverCont")
     let main = document.querySelector("main")
@@ -362,15 +390,25 @@
         // beginRecord();
         location.reload();
       }
+      if (keyPressed.originalEvent.key == "R" || keyPressed.originalEvent.key == "r") {
+        location.reload();
+      }
+
+      if (keyPressed.originalEvent.key == "c" || keyPressed.originalEvent.key == "C") {
+        localStorage.clear();
+      }
+      console.log(keyPressed)
+      console.log(keyPressed.originalEvent.key)
     });
+
 
     // new CircleType(document.querySelector('h1')).radius(2);
     function showAllPics() {
       screenSaver = true;
-      console.log('showAllPics')
+      // console.log('showAllPics')
       // hide wardrobe, and all text
-      wardrobe.classList.add('hide')
-      wardrobeImg.classList.add('hide')
+      // wardrobe.classList.add('hide')
+      // wardrobeImg.classList.add('hide')
       instructions.classList.add('hide')
     
       // clear the qr code div of any images
