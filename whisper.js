@@ -177,11 +177,15 @@ async function processNextChunk() {
           // Append new text to cumulative transcript
           if (fullTranscript.length > 0) {
             fullTranscript += " " + result.text.trim();
-            displayedText += " \n" + result.text.trim();
+            for (let i = 0; i < 2; i++ ) {
+              displayedText += " \n" + result.text.trim();
+            }
+            
           } else {
             fullTranscript = result.text.trim();
-            displayedText += " \n" + result.text.trim();
-          }
+            for (let i = 0; i < 2; i++ ) {
+              displayedText += " \n" + result.text.trim();
+            }          }
           console.log(result.text.trim())
         }
       }

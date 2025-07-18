@@ -231,7 +231,7 @@ function draw() {
             height / 2,
           0
         );
-        rotateY(radians(-55));
+        rotateY(radians(40));
         texture(wordsT);
         cylinder(
           torsoD,
@@ -257,7 +257,8 @@ function draw() {
         wordsLA.translate(-wordsLA.width, 0);
         wordsLA.fill(255);
         wordsLA.textAlign(CENTER);
-        wordsLA.text(displayedText, 0, 0);
+        wordsLA.text(displayedText, 0, 20);
+        
 
         // Left upper arm
         push();
@@ -267,7 +268,7 @@ function draw() {
           atan2(leftElbow.y - leftShoulder.y, leftElbow.x - leftShoulder.x)
         );
         rotateZ(80);
-        rotateY(radians(-60));
+        rotateY(radians(60));
 
         fill(0, 0, 255); // Left arm color
         texture(wordsUA);
@@ -282,7 +283,7 @@ function draw() {
         translate(leftElbow.x - width / 2, leftElbow.y - height / 2, 0);
         rotateZ(atan2(leftWrist.y - leftElbow.y, leftWrist.x - leftElbow.x));
         rotateZ(80);
-        rotateY(radians(-60));
+        rotateY(radians(100));
         fill(0, 0, 255); // Left arm color
         texture(wordsLA);
         cylinder(
@@ -299,7 +300,7 @@ function draw() {
           atan2(rightElbow.y - rightShoulder.y, rightElbow.x - rightShoulder.x)
         );
         rotateZ(80);
-        rotateY(radians(-60));
+        rotateY(radians(60));
         fill(0, 0, 255); // Right arm color
         texture(wordsUA);
         cylinder(
@@ -315,7 +316,7 @@ function draw() {
           atan2(rightWrist.y - rightElbow.y, rightWrist.x - rightElbow.x)
         );
         rotateZ(80);
-        rotateY(radians(-60));
+        rotateY(radians(100));
         fill(0, 0, 255); // Right arm color
         texture(wordsLA);
         cylinder(
@@ -361,7 +362,7 @@ function draw() {
         rotateZ(atan2(leftKnee.y - leftHip.y, leftKnee.x - leftHip.x));
         scale(0.8, 0.8, 0.8);
         rotateZ(80.1);
-        rotateY(radians(-60));
+        rotateY(radians(60));
         fill(255); // Left leg color
         texture(wordsUL);
         cylinder(
